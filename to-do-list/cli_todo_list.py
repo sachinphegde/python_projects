@@ -10,16 +10,17 @@ import json
 
 TO_DO_LIST_FILE = "todo_list.json"
 
-def load_todo_list():
+def load_todo_json():
     if not os.path.exists(TO_DO_LIST_FILE):
-        with open(TO_DO_LIST_FILE, "w", encoding= "UTF-8") as file:
+        with open(TO_DO_LIST_FILE, "r+", encoding= "UTF-8") as file:
             file.write("[]")
-
-    with open(TO_DO_LIST_FILE, "r", encoding="UTF-8") as file:
-        try:
             todo_list = json.load(file)
-        except json.JSONDecodeError:
-            todo_list = []
+    else:
+        with open(TO_DO_LIST_FILE, "r+", encoding="UTF-8") as file:
+            try:
+                todo_list = json.load(file)
+            except json.JSONDecodeError:
+                todo_list = []
     return todo_list
 
 
@@ -59,22 +60,61 @@ def get_user_input():
     args = parser.parse_args()
     return args
 
-# def add_task():
-    
-# def delete_task():
-    
-# def update_task():
-    
-# def list_task():
-    
-# def task_progress():
-    
+def add_task(task_desc):
+    """
+    Adds a new task to the to-do list.
+    """
+    todo_list = load_todo_json()
+    max_id = max((task.get("id", 0) for task in todo_list), default=0)
+    new_id = max_id + 1
+    new_task = {"id": new_id, "task": task_desc, "status": "todo"}
+    todo_list.append(new_task)
+    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+        json.dump(todo_list, file, indent=2, ensure_ascii=False)
+
+def delete_task(id):
+    """
+    Deletes a task from the to-do list by its ID.
+    """
+    todo_list = load_todo_json()
+
+    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+        json.dump(todo_list, file, indent=2, ensure_ascii=False)
+
+def update_task():
+    print("Update task")
+
+def list_task(args):
+    """
+    Lists tasks based on the specified type.
+    """
+    todo_list = load_todo_json()
+    for task in todo_list:
+        if args.all:
+            print(f"all tasks:")
+
+
+def task_progress():
+    print("Update task progress")
+
+
 def main():
+    """
+    Main function to run the command-line to-do list application.
+    """
     try:
         args = get_user_input()
     except SystemExit as e:
         exit(e.code)
 
+    if args.command == "add":
+        add_task(args.task)
+    elif args.command == "delete":
+        delete_task(args.task_id)
+    elif args.command == "modify":
+        update_task(args.task_id, args.new_task)
+    elif args.command == "list":
+        list_task(args)
 
 if __name__ == "__main__":
     main()
