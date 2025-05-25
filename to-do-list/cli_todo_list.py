@@ -11,6 +11,16 @@ import json
 TO_DO_LIST_FILE = "todo_list.json"
 
 def load_todo_json():
+    """
+    Loads the to-do list from a JSON file.
+    If the file does not exist, it creates an empty list.
+    If the file is empty or contains invalid JSON, it initializes an empty list.
+    If the file is not empty, it loads the JSON data into a list.
+    If the file is not valid JSON, it initializes an empty list.
+
+    Returns:
+        list: A list of tasks loaded from the JSON file.
+    """
     if not os.path.exists(TO_DO_LIST_FILE):
         with open(TO_DO_LIST_FILE, "r+", encoding= "UTF-8") as file:
             file.write("[]")
@@ -91,7 +101,13 @@ def list_task(args):
     todo_list = load_todo_json()
     for task in todo_list:
         if args.all:
-            print(f"all tasks:")
+            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
+        elif args.todo and task['status'] == "todo":
+            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
+        elif args.done and task['status'] == "done":
+            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
+        elif args.in_progress and task['status'] == "in-progress":
+            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
 
 
 def task_progress():
