@@ -98,12 +98,23 @@ def delete_task(id):
     Deletes a task from the to-do list by its ID.
     """
     todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == id:
+            todo_list.remove(task)
+            print(f"Task with ID {id} has been deleted.")
+            break
+    else:
+        print(f"Task with ID {id} not found.")
+        return
 
     with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
         json.dump(todo_list, file, indent=2, ensure_ascii=False)
 
 def update_task():
-    print("Update task")
+    """
+    Updates a task in the to-do list by its ID.
+    """
+    todo_list = load_todo_json()
 
 def list_task(args):
     """
