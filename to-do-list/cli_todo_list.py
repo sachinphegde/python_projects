@@ -7,7 +7,9 @@ A simple command-line to-do list application.
 import argparse
 import os
 import json
+import datetime
 
+# Constants
 TO_DO_LIST_FILE = "todo_list.json"
 
 def load_todo_json():
@@ -77,7 +79,16 @@ def add_task(task_desc):
     todo_list = load_todo_json()
     max_id = max((task.get("id", 0) for task in todo_list), default=0)
     new_id = max_id + 1
-    new_task = {"id": new_id, "task": task_desc, "status": "todo"}
+    created_at = datetime.datetime.now().isoformat()
+    updated_at = created_at  # Initially, created and updated timestamps are the same
+    # Create a new task dictionary
+    new_task = {
+        "id": new_id,
+        "task": task_desc,
+        "status": "todo",
+        "created_at": created_at,
+        "updated_at": updated_at
+        }
     todo_list.append(new_task)
     with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
         json.dump(todo_list, file, indent=2, ensure_ascii=False)
@@ -111,6 +122,9 @@ def list_task(args):
 
 
 def task_progress():
+    """
+    Updates the progress of a task.
+    """
     print("Update task progress")
 
 
