@@ -12,6 +12,7 @@ import datetime
 # Constants
 TO_DO_LIST_FILE = "todo_list.json"
 
+
 def load_todo_json():
     """
     Loads the to-do list from a JSON file.
@@ -24,11 +25,11 @@ def load_todo_json():
         list: A list of tasks loaded from the JSON file.
     """
     if not os.path.exists(TO_DO_LIST_FILE):
-        with open(TO_DO_LIST_FILE, "r+", encoding= "UTF-8") as file:
+        with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
             file.write("[]")
-            todo_list = json.load(file)
+            todo_list = []
     else:
-        with open(TO_DO_LIST_FILE, "r+", encoding="UTF-8") as file:
+        with open(TO_DO_LIST_FILE, "r", encoding="UTF-8") as file:
             try:
                 todo_list = json.load(file)
             except json.JSONDecodeError:
@@ -72,6 +73,7 @@ def get_user_input():
     args = parser.parse_args()
     return args
 
+
 def add_task(task_desc):
     """
     Adds a new task to the to-do list.
@@ -93,28 +95,41 @@ def add_task(task_desc):
     with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
         json.dump(todo_list, file, indent=2, ensure_ascii=False)
 
-def delete_task(id):
+
+def delete_task(task_id):
     """
     Deletes a task from the to-do list by its ID.
     """
     todo_list = load_todo_json()
     for task in todo_list:
-        if task['id'] == id:
+        if task['id'] == task_id:
             todo_list.remove(task)
-            print(f"Task with ID {id} has been deleted.")
+            with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+                json.dump(todo_list, file, indent=2, ensure_ascii=False)
+            print(f"Task with ID {task_id} has been deleted.")
+            break
+    else:
+        print(f"Task with ID {task_id} not found.")
+        return
+
+
+def update_task(task_id, new_task_desc):
+    """
+    Updates a task in the to-do list by its ID.
+    """
+    todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == task_id:
+            task['task'] = new_task_desc
+            task['updated_at'] = datetime.datetime.now().isoformat()
+            with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+                json.dump(todo_list, file, indent=2, ensure_ascii=False)
+            print(f"Task with ID {task_id} has been deleted.")
             break
     else:
         print(f"Task with ID {id} not found.")
         return
 
-    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-        json.dump(todo_list, file, indent=2, ensure_ascii=False)
-
-def update_task():
-    """
-    Updates a task in the to-do list by its ID.
-    """
-    todo_list = load_todo_json()
 
 def list_task(args):
     """
