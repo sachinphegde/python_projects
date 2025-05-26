@@ -47,10 +47,8 @@ def save_todo_json(todo_list):
     Args:
         todo_list (list): A list of tasks to save to the JSON file.
     """
-    try:
-        with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-            json.dump(todo_list, file, indent=2, ensure_ascii=False)
-    except
+    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+        json.dump(todo_list, file, indent=2, ensure_ascii=False)
 
 
 def get_user_input():
