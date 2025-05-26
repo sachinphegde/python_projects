@@ -37,6 +37,22 @@ def load_todo_json():
     return todo_list
 
 
+def save_todo_json(todo_list):
+    """
+    Saves the to-do list to a JSON file.
+    If the file does not exist, it creates it.
+    If the file is empty or contains invalid JSON, it initializes an empty list.
+    If the file is not empty, it saves the JSON data into the file.
+
+    Args:
+        todo_list (list): A list of tasks to save to the JSON file.
+    """
+    try:
+        with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+            json.dump(todo_list, file, indent=2, ensure_ascii=False)
+    except
+
+
 def get_user_input():
     """
     Parses command-line arguments for the to-do list application.
@@ -92,8 +108,7 @@ def add_task(task_desc):
         "updated_at": updated_at
         }
     todo_list.append(new_task)
-    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-        json.dump(todo_list, file, indent=2, ensure_ascii=False)
+    save_todo_json(todo_list)
 
 
 def delete_task(task_id):
@@ -104,8 +119,7 @@ def delete_task(task_id):
     for task in todo_list:
         if task['id'] == task_id:
             todo_list.remove(task)
-            with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-                json.dump(todo_list, file, indent=2, ensure_ascii=False)
+            save_todo_json(todo_list)
             print(f"Task with ID {task_id} has been deleted.")
             break
     else:
@@ -122,8 +136,7 @@ def update_task(task_id, new_task_desc):
         if task['id'] == task_id:
             task['task'] = new_task_desc
             task['updated_at'] = datetime.datetime.now().isoformat()
-            with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-                json.dump(todo_list, file, indent=2, ensure_ascii=False)
+            save_todo_json(todo_list)
             print(f"Task with ID {task_id} has been deleted.")
             break
     else:
@@ -147,11 +160,24 @@ def list_task(args):
             print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
 
 
-def task_progress():
+def task_progress(args):
     """
     Updates the progress of a task.
     """
-    print("Update task progress")
+    todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == args.task_id:
+            if args.todo:
+                task['status'] == 'todo'
+            elif args.done:
+                task['status'] = 'done'
+            elif args.in_progress:
+                task['status'] = 'in-progress'
+            task['updated_at'] = datetime.datetime.now().isoformat()
+            save_todo_json(todo_list)
+        else:
+            print(f"Task with ID {args.task_id} not found.")
+            return
 
 
 def main():
@@ -171,6 +197,10 @@ def main():
         update_task(args.task_id, args.new_task)
     elif args.command == "list":
         list_task(args)
+    elif( args.command == "progress"):
+        task_progress(args)
+    else:
+        print("Unknown command. Use --help for usage information.")
 
 if __name__ == "__main__":
     main()
