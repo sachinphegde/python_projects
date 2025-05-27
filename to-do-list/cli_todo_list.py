@@ -33,6 +33,7 @@ def load_todo_json():
             try:
                 todo_list = json.load(file)
             except json.JSONDecodeError:
+                print(f"Warning: {TO_DO_LIST_FILE} contains invalid JSON. Please check the file.")
                 todo_list = []
     return todo_list
 
@@ -82,7 +83,7 @@ def get_user_input():
     group = progress_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--todo", action="store_true", help="List pending tasks")
     group.add_argument("--done", action="store_true", help="List completed tasks")
-    group.add_argument("--in-progress", action="store_true", help="List tasks with progress")
+    group.add_argument("--inprogress", action="store_true", help="List tasks with progress")
 
     args = parser.parse_args()
     return args
@@ -107,6 +108,7 @@ def add_task(task_desc):
         }
     todo_list.append(new_task)
     save_todo_json(todo_list)
+    print(f"Task '{task_desc}' has been added with ID {new_id}.")
 
 
 def delete_task(task_id):
@@ -135,7 +137,7 @@ def update_task(task_id, new_task_desc):
             task['task'] = new_task_desc
             task['updated_at'] = datetime.datetime.now().isoformat()
             save_todo_json(todo_list)
-            print(f"Task with ID {task_id} has been deleted.")
+            print(f"Task with ID {task_id} has been modified.")
             break
     else:
         print(f"Task with ID {id} not found.")
@@ -166,10 +168,10 @@ def task_progress(args):
     for task in todo_list:
         if task['id'] == args.task_id:
             if args.todo:
-                task['status'] == 'todo'
+                task['status'] = 'todo'
             elif args.done:
                 task['status'] = 'done'
-            elif args.in_progress:
+            elif args.inprogress:
                 task['status'] = 'in-progress'
             task['updated_at'] = datetime.datetime.now().isoformat()
             save_todo_json(todo_list)
@@ -195,10 +197,11 @@ def main():
         update_task(args.task_id, args.new_task)
     elif args.command == "list":
         list_task(args)
-    elif( args.command == "progress"):
+    elif args.command == "progress":
         task_progress(args)
     else:
         print("Unknown command. Use --help for usage information.")
+
 
 if __name__ == "__main__":
     main()
