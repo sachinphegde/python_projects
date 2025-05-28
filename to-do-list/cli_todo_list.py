@@ -8,6 +8,7 @@ import argparse
 import os
 import json
 import datetime
+import sys
 
 # Constants
 TO_DO_LIST_FILE = "todo_list.json"
@@ -175,6 +176,7 @@ def task_progress(args):
                 task['status'] = 'in-progress'
             task['updated_at'] = datetime.datetime.now().isoformat()
             save_todo_json(todo_list)
+            print(f"Progress for Task ID {args.task_id} updated to '{task['status']}'.")
         else:
             print(f"Task with ID {args.task_id} not found.")
             return
@@ -186,8 +188,8 @@ def main():
     """
     try:
         args = get_user_input()
-    except SystemExit as e:
-        exit(e.code)
+    except SystemExit as error:
+        sys.exit(error.code)
 
     if args.command == "add":
         add_task(args.task)
