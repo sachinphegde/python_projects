@@ -8,9 +8,11 @@ import argparse
 import os
 import json
 import datetime
+import sys
 
 # Constants
 TO_DO_LIST_FILE = "todo_list.json"
+
 
 def load_todo_json():
     """
@@ -24,16 +26,31 @@ def load_todo_json():
         list: A list of tasks loaded from the JSON file.
     """
     if not os.path.exists(TO_DO_LIST_FILE):
-        with open(TO_DO_LIST_FILE, "r+", encoding= "UTF-8") as file:
+        with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
             file.write("[]")
-            todo_list = json.load(file)
+            todo_list = []
     else:
-        with open(TO_DO_LIST_FILE, "r+", encoding="UTF-8") as file:
+        with open(TO_DO_LIST_FILE, "r", encoding="UTF-8") as file:
             try:
                 todo_list = json.load(file)
             except json.JSONDecodeError:
+                print(f"Warning: {TO_DO_LIST_FILE} contains invalid JSON. Please check the file.")
                 todo_list = []
     return todo_list
+
+
+def save_todo_json(todo_list):
+    """
+    Saves the to-do list to a JSON file.
+    If the file does not exist, it creates it.
+    If the file is empty or contains invalid JSON, it initializes an empty list.
+    If the file is not empty, it saves the JSON data into the file.
+
+    Args:
+        todo_list (list): A list of tasks to save to the JSON file.
+    """
+    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
+        json.dump(todo_list, file, indent=2, ensure_ascii=False)
 
 
 def get_user_input():
@@ -67,10 +84,11 @@ def get_user_input():
     group = progress_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--todo", action="store_true", help="List pending tasks")
     group.add_argument("--done", action="store_true", help="List completed tasks")
-    group.add_argument("--in-progress", action="store_true", help="List tasks with progress")
+    group.add_argument("--inprogress", action="store_true", help="List tasks with progress")
 
     args = parser.parse_args()
     return args
+
 
 def add_task(task_desc):
     """
@@ -90,20 +108,42 @@ def add_task(task_desc):
         "updated_at": updated_at
         }
     todo_list.append(new_task)
-    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-        json.dump(todo_list, file, indent=2, ensure_ascii=False)
+    save_todo_json(todo_list)
+    print(f"Task '{task_desc}' has been added with ID {new_id}.")
 
-def delete_task(id):
+
+def delete_task(task_id):
     """
     Deletes a task from the to-do list by its ID.
     """
     todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == task_id:
+            todo_list.remove(task)
+            save_todo_json(todo_list)
+            print(f"Task with ID {task_id} has been deleted.")
+            break
+    else:
+        print(f"Task with ID {task_id} not found.")
+        return
 
-    with open(TO_DO_LIST_FILE, "w", encoding="UTF-8") as file:
-        json.dump(todo_list, file, indent=2, ensure_ascii=False)
 
-def update_task():
-    print("Update task")
+def update_task(task_id, new_task_desc):
+    """
+    Updates a task in the to-do list by its ID.
+    """
+    todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == task_id:
+            task['task'] = new_task_desc
+            task['updated_at'] = datetime.datetime.now().isoformat()
+            save_todo_json(todo_list)
+            print(f"Task with ID {task_id} has been modified.")
+            break
+    else:
+        print(f"Task with ID {id} not found.")
+        return
+
 
 def list_task(args):
     """
@@ -121,11 +161,25 @@ def list_task(args):
             print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
 
 
-def task_progress():
+def task_progress(args):
     """
     Updates the progress of a task.
     """
-    print("Update task progress")
+    todo_list = load_todo_json()
+    for task in todo_list:
+        if task['id'] == args.task_id:
+            if args.todo:
+                task['status'] = 'todo'
+            elif args.done:
+                task['status'] = 'done'
+            elif args.inprogress:
+                task['status'] = 'in-progress'
+            task['updated_at'] = datetime.datetime.now().isoformat()
+            save_todo_json(todo_list)
+            print(f"Progress for Task ID {args.task_id} updated to '{task['status']}'.")
+        else:
+            print(f"Task with ID {args.task_id} not found.")
+            return
 
 
 def main():
@@ -134,8 +188,8 @@ def main():
     """
     try:
         args = get_user_input()
-    except SystemExit as e:
-        exit(e.code)
+    except SystemExit as error:
+        sys.exit(error.code)
 
     if args.command == "add":
         add_task(args.task)
@@ -145,6 +199,11 @@ def main():
         update_task(args.task_id, args.new_task)
     elif args.command == "list":
         list_task(args)
+    elif args.command == "progress":
+        task_progress(args)
+    else:
+        print("Unknown command. Use --help for usage information.")
+
 
 if __name__ == "__main__":
     main()
