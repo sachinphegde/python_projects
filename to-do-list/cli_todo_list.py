@@ -9,9 +9,16 @@ import os
 import json
 import datetime
 import sys
+from pathlib import Path
 
 # Constants
-TO_DO_LIST_FILE = "todo_list.json"
+# OS	| Path.home() points to
+# ------|----------------------
+# Linux	| /home/username
+# macOS	| /Users/username
+# Windows | C:\Users\username
+homedir = Path.home()
+TO_DO_LIST_FILE = homedir/"todo_list.json"
 
 
 def load_todo_json():
