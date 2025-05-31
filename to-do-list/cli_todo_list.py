@@ -159,7 +159,8 @@ def list_task(args):
     todo_list = load_todo_json()
     for task in todo_list:
         if args.all:
-            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
+            print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}"
+                  f" | Created At: {task['created_at']} | Updated At: {task['updated_at']}")
         elif args.todo and task['status'] == "todo":
             print(f"ID: {task['id']} | Task: {task['task']} | Status: {task['status']}")
         elif args.done and task['status'] == "done":
