@@ -22,6 +22,7 @@ import matplotlib
 homedir = Path.home()
 EXPENSE_DB = homedir/"spend_tracker.db"
 
+
 def create_database():
     """
     Creates the database and the expenses table if it does not exist.
@@ -31,15 +32,15 @@ def create_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
+            description TEXT,
             amount REAL NOT NULL,
             category TEXT NOT NULL,
-            description TEXT
+            subCategory TEXT,
+            date TEXT NOT NULL
         )
     ''')
     conn.commit()
     conn.close()
-
 
 
 def get_user_args():
@@ -73,16 +74,21 @@ def add_expense():
         amount = input("Amount (or 'q' to quit): ").strip()
         if amount == 'q':
             break
-        category = input("Category: ").strip()
         description = input("Description: ").strip()
+        category = input("Category: ").strip()
+        sub_category = input("Sub Category: ").strip()
         if not amount or not category:
             print("Amount and category are required.")
             continue
         conn = sqlite3.connect(EXPENSE_DB)
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO expenses (description, amount, category, date) VALUES (?, ?, ?, ?)",
-            (description, float(amount), category, expense_date)
+            """
+            INSERT INTO expenses (
+            description, amount, category, subCategory, date)
+            VALUES (?, ?, ?, ?)
+            """,
+            (description, float(amount), category, sub_category, expense_date)
         )
         conn.commit()
         conn.close()
@@ -111,6 +117,7 @@ def view_expenses(args):
 
     conn.commit()
     conn.close()
+
 
 def delete_expense(args):
     """
